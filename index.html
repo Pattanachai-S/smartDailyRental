@@ -133,8 +133,8 @@
 
   function getStatusRoom101(room) {
     
-    dailyRentalContract.getRoomStatus(room, function (errorGet, resultGet) {
-      document.getElementById('status' + room).innerText = "haha"
+    dailyRentalContract.getRoomStatus(room, function (error, result) {
+      document.getElementById('status' + room).innerText = result;
     })
     
   }
