@@ -48,6 +48,7 @@
       margin: 1em 0;
     }
   </style>
+  <script language="javascript" type="text/javascript" src="cryptozombies_abi.js"></script>
 </head>
 <body>
   <!-- Form -->
@@ -98,44 +99,30 @@
         result + "' target='_blank'>" + result + "</a>");
     });
   }
-  // Initializing 
 
-  /*
-  if (typeof web3 !== 'undefined') {
+  function startApp() {
+    var rentalContractAddress = "0x862782db3ef80b58ba641556047ab763581efa05";
+    dailyRental = new web3js.eth.Contract(cryptoZombiesABI, cryptoZombiesAddress);
 
-    const testnet = 'https://kovan.infura.io/v3/0755900645ab40bb9d87d6bc69529368';
-    //const web3 = new Web3(new Web3.providers.HttpProvider(testnet));  // from infura
-    
-    console.log("Pulling metamas as current provider");
-    web3 = new Web3(web3.currentProvider); // inject from Metamask plugin
-  }*/
+    userAccount = web3.eth.accounts[0];
 
-  window.addEventListener('load', () => {
-    // If web3 is not injected (modern browsers)...
-    if (typeof web3 === 'undefined') {
-      console.log("Listen for provider injection")
-      window.addEventListener('message', ({ data }) => {
-        if (data && data.type && data.type === 'ETHEREUM_PROVIDER_SUCCESS') {
-          // Use injected provider, start dapp...
-          web3 = new Web3(ethereum);
-        }
-      });
-      // Request provider
-      window.postMessage({ type: 'ETHEREUM_PROVIDER_REQUEST' }, '*');
-    }
-    // If web3 is injected (legacy browsers)...
-    else {
- 
-      console.log("Use injected provider, start dapp")
-      web3 = new Web3(web3.currentProvider);
-      window.ethereum.enable();
-      
-    }
-    if (typeof web3 === 'undefined') {
-      console.log("web3 undefined")
+
+  }
+
+  window.addEventListener('load', function () {
+
+    // ตรวจสอบว่าbrowser ได้เพิ่ม Web3 เข้ามาแล้วหรือยัง (Mist/MetaMask)
+    if (typeof web3 !== 'undefined') {
+      // ใช้ Mist/MetaMask's provider
+      web3js = new Web3(web3.currentProvider);
     } else {
-      console.log("web3 defined")
+      // รับมือกับกรณีที่ผู้ใช้ยังไม่ได้ทำการ install เจ้า Metamask
+      // เป็นไปได้ว่าเราอาจจะต้องแสดงข้อความเพื่อบอกผู้ใช้ให้ลง Metamask เสียก่อน
     }
+
+    // ตอนนี้เราก็สามารถที่จะเปิดแอพพลิเคชั่นขึ้นมา และเข้าถึง web3 ได้อย่างอิสระแล้ว:
+    startApp()
+
   });
 
   // Get default address
