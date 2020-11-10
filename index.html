@@ -2,8 +2,6 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Daily Rental</title>
   <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script language="javascript" type="text/javascript" src="web3.min.js"></script>
@@ -52,7 +50,13 @@
       margin: 1em 0;
     }
 
-    #statusD {
+    #room {
+      padding: 1em;
+      background-color: #fff;
+      margin: 1em 0;
+    }
+
+    #info{
       padding: 1em;
       background-color: #fff;
       margin: 1em 0;
@@ -64,90 +68,85 @@
   <!-- Form -->
   <div class="container">
     <h1>Daily Rental</h1>
-    <h3>Room</h3>
-    <h4 style="display: inline-block">101 </h4>
-    <statusD id="status101" style="display: inline-block"> test<span id="status101"></span></statusD>
+    <h2>Room</h2>
+    <button id="button" style="    display: inline-block" onclick="javascript:checkStatus()">CHECK ALL</button>
+    <info style="display: inline-block"> Period time:<span id="period">-Waiting-</span> second,  </info>
+    <info style="display: inline-block">   Prices:<span id="prices">-Waiting-</span> Wei</info>
+    <hr />
+
+    <!-- Room -->
+    <h4 style="display: inline-block">101 :</h4>
+    <room id="status101" style="display: inline-block"> -Waiting-<span id="status101"></span></room>
+    <br />
     <button id="button" style="    display: inline-block" onclick="javascript:getStatusRoom(101)">check status</button>
     <button id="button" style="    display: inline-block" onclick="javascript:rentRoom(101)">rent</button>
-
-
-    <h1>DApp</h1>
-    <h2 id="balance">Current Balance = <span id="currentBalance"></span></h2>
-    <button id="button" style="display: block" onclick="javascript:getBalance()">Get New Balance</button>
     <hr />
+
+    <!-- Room -->
+    <h4 style="display: inline-block">102 :</h4>
+    <room id="status102" style="display: inline-block"> -Waiting-<span id="status102"></span></room>
     <br />
-    <label for="newBalance" class="col-lg-2 control-label"><strong>New Balance</strong></label>
-    <input id="newBalance" type="number" value="" style="display: inline-block">
-    <button id="button" style="display: inline-block" onclick="javascript:setBalance()">Set New Balance</button>
+    <button id="button" style="    display: inline-block" onclick="javascript:getStatusRoom(102)">check status</button>
+    <button id="button" style="    display: inline-block" onclick="javascript:rentRoom(102)">rent</button>
+    <hr />
+
+    <!-- Room -->
+    <h4 style="display: inline-block">103 :</h4>
+    <room id="status103" style="display: inline-block"> -Waiting-<span id="status103"></span></room>
     <br />
-    <label><strong>Status</strong></label>
-    <h4 id="status"></h4>
+    <button id="button" style="    display: inline-block" onclick="javascript:getStatusRoom(103)">check status</button>
+    <button id="button" style="    display: inline-block" onclick="javascript:rentRoom(103)">rent</button>
+    <hr />
   </div>
 </body>
 <script>
   function addStatusLine(text) {
     document.getElementById("status").innerHTML = text + "<br/><br/>" + document.getElementById("status").innerHTML;
   }
-  function getBalance() {
-    addStatusLine("");
-    addStatusLine("calling getBalance()");
-    // TODO: Call getBalance Smart Contract
-    SimpleContract.getBalance(function (errorGet, resultGet) {
-      addStatusLine("Current balance =" + resultGet);
-      document.getElementById('currentBalance').innerText = resultGet;
-      document.getElementById('status101').innerText = resultGet;
-    })
-  }
-  function setBalance() {
-    // TODO: Call setBalance Smart Contract
-    //addStatusLine("called");
-    newBalance = parseInt(document.getElementById('newBalance').value);
-    //addStatusLine(newBalance);
-    SimpleContract.setBalance(newBalance, function (error, result) {
-      if (error) {
-        addStatusLine(error);
-        return;
-      }
-      // addStatusLine("");
-      addStatusLine("calling setBalance(" + newBalance + ")");
-      txHash = result;
-      addStatusLine("TxHash = <a href='https://kovan.etherscan.io/tx/" +
-        result + "' target='_blank'>" + result + "</a>");
-    });
-  }
-
-
 
   function startApp() {
-    var rentalContractAddress = "0x862782db3ef80b58ba641556047ab763581efa05";
+    var rentalContractAddress = "0xc28F48565dd9b116D0ba4834159bf3bf45fa7321";
     //dailyRentalContract = new web3js.eth.Contract(dailyRentalABI, rentalContractAddress);
     var rentalContractABI = web3.eth.contract(dailyRentalABI);
     dailyRentalContract = rentalContractABI.at(rentalContractAddress);
     userAccount = web3.eth.accounts[0];
+    checkStatus()
+  }
 
+  function checkStatus() {
+    getStatusRoom(101)
+    getStatusRoom(102)
+    getStatusRoom(103)
+    getPrices()
+    getPeriod()
+  }
 
+  function getPrices() {
+    dailyRentalContract.getPrice(function (error, result) {
+    document.getElementById('prices').innerText = result;
+    })
+  }
+
+  function getPeriod() {
+    dailyRentalContract.getRoundPeriod(function (error, result) {
+      document.getElementById('period').innerText = result;
+    })
   }
 
   function getStatusRoom(room) {
-    
+    document.getElementById('status' + room).innerText = "-Waiting-";
     dailyRentalContract.getRoomStatus(room, function (error, result) {
       document.getElementById('status' + room).innerText = result;
-    })
-    
+    })   
   }
 
   function rentRoom(room) {
-    dailyRentalContract.rent(room, function (error, result) {
+    dailyRentalContract.rent(room, { from: userAccount, value: 100 }, function (error, result) {
       if (error) {
         addStatusLine(error);
         return;
       }
     })
-  }
-
-
-  function getZombieDetails(id) {
-    return cryptoZombies.methods.zombies(id).call()
   }
 
   window.addEventListener('load', function () {
