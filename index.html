@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>DApp Tutorial1</title>
+  <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script language="javascript" type="text/javascript" src="web3.min.js"></script>
+  <script language="javascript" type="text/javascript" src="dailyRental_abi.js"></script>
   <style>
     body {
       background-color: #F0F0F0;
@@ -34,6 +37,7 @@
       display: block;
     }
 
+
     #balance {
       padding: 1em;
       background-color: #fff;
@@ -47,12 +51,25 @@
       background-color: #fff;
       margin: 1em 0;
     }
+
+    #statusD {
+      padding: 1em;
+      background-color: #fff;
+      margin: 1em 0;
+    }
   </style>
-  <script language="javascript" type="text/javascript" src="cryptozombies_abi.js"></script>
+
 </head>
 <body>
   <!-- Form -->
   <div class="container">
+    <h1>Daily Rental</h1>
+    <h3>Room</h3>
+    <h4 style="display: inline-block">101 </h4>
+    <statusD id="status101" style="display: inline-block"> test<span id="status101"></span></statusD>
+    <button id="button" style="    display: inline-block" onclick="javascript:getBalance()">rent</button>
+
+
     <h1>DApp</h1>
     <h2 id="balance">Current Balance = <span id="currentBalance"></span></h2>
     <button id="button" style="display: block" onclick="javascript:getBalance()">Get New Balance</button>
@@ -102,7 +119,7 @@
 
   function startApp() {
     var rentalContractAddress = "0x862782db3ef80b58ba641556047ab763581efa05";
-    dailyRental = new web3js.eth.Contract(cryptoZombiesABI, cryptoZombiesAddress);
+    dailyRental = new web3js.eth.Contract(dailyRentalABI, rentalContractAddress);
 
     userAccount = web3.eth.accounts[0];
 
@@ -111,16 +128,12 @@
 
   window.addEventListener('load', function () {
 
-    // ตรวจสอบว่าbrowser ได้เพิ่ม Web3 เข้ามาแล้วหรือยัง (Mist/MetaMask)
     if (typeof web3 !== 'undefined') {
-      // ใช้ Mist/MetaMask's provider
+      // use MetaMask's provider
       web3js = new Web3(web3.currentProvider);
     } else {
-      // รับมือกับกรณีที่ผู้ใช้ยังไม่ได้ทำการ install เจ้า Metamask
-      // เป็นไปได้ว่าเราอาจจะต้องแสดงข้อความเพื่อบอกผู้ใช้ให้ลง Metamask เสียก่อน
+      // if dont have metamask
     }
-
-    // ตอนนี้เราก็สามารถที่จะเปิดแอพพลิเคชั่นขึ้นมา และเข้าถึง web3 ได้อย่างอิสระแล้ว:
     startApp()
 
   });
