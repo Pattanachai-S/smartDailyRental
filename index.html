@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>DApp Tutorial1</title>
+  <title>Daily Rental</title>
   <script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script language="javascript" type="text/javascript" src="web3.min.js"></script>
   <script language="javascript" type="text/javascript" src="dailyRental_abi.js"></script>
@@ -67,8 +67,8 @@
     <h3>Room</h3>
     <h4 style="display: inline-block">101 </h4>
     <statusD id="status101" style="display: inline-block"> test<span id="status101"></span></statusD>
-    <button id="button" style="    display: inline-block" onclick="javascript:getStatusRoom101(101)">check status</button>
-    <button id="button" style="    display: inline-block" onclick="javascript:getStatus(101)">rent</button>
+    <button id="button" style="    display: inline-block" onclick="javascript:getStatusRoom(101)">check status</button>
+    <button id="button" style="    display: inline-block" onclick="javascript:rentRoom(101)">rent</button>
 
 
     <h1>DApp</h1>
@@ -84,9 +84,6 @@
     <h4 id="status"></h4>
   </div>
 </body>
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
-<script src="Lottoreum.json"></script>
 <script>
   function addStatusLine(text) {
     document.getElementById("status").innerHTML = text + "<br/><br/>" + document.getElementById("status").innerHTML;
@@ -131,7 +128,7 @@
 
   }
 
-  function getStatusRoom101(room) {
+  function getStatusRoom(room) {
     
     dailyRentalContract.getRoomStatus(room, function (error, result) {
       document.getElementById('status' + room).innerText = result;
@@ -139,28 +136,15 @@
     
   }
 
-  function getStatus(room) {
-    document.getElementById('status' + room).innerText = "WTF";
-    $("#txStatus").text("Creating new zombie on the blockchain. This may take a while...");
+  function rentRoom(room) {
+    dailyRentalContract.rent(room, function (error, result) {
+      if (error) {
+        addStatusLine(error);
+        return;
+      }
+    })
   }
 
-  function createRandomZombie(name) {
-    // ตรงนี้อาจจะต้องใช้เวลาซักเล็กน้อย ดังนั้นอย่าลืมที่จะอัพเดท UI ให้บอกผู้ใช้ด้วยว่า
-    // transaction ได้ถูกส่งไปเป็นที่เรียบร้อยแล้ว
-    $("#txStatus").text("Creating new zombie on the blockchain. This may take a while...");
-    // ส่ง tx ไปยัง contract ของเรา:
-    return CryptoZombies.methods.createRandomZombie(name)
-      .send({ from: userAccount })
-      .on("receipt", function (receipt) {
-        $("#txStatus").text("Successfully created " + name + "!");
-        // Block chain ยอมรับ transaction เข้ามาเป็นที่เรียบร้อย ได้เวลามาเขียน UI ใหม่กันแล้ว
-        getZombiesByOwner(userAccount).then(displayZombies);
-      })
-      .on("error", function (error) {
-        // เตือนผู้ใช้ว่ามีความล้มเหลวเกิดขึ้นในการส่ง transaction
-        $("#txStatus").text(error);
-      });
-  }
 
   function getZombieDetails(id) {
     return cryptoZombies.methods.zombies(id).call()
