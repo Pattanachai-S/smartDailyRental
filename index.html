@@ -71,12 +71,12 @@
     <h2>Room</h2>
     <button id="button" style="    display: inline-block" onclick="javascript:checkStatus()">CHECK ALL</button>
     <info style="display: inline-block"> Period time:<span id="period">-Waiting-</span> second,  </info>
-    <info style="display: inline-block">   Prices:<span id="prices">-Waiting-</span> Wei</info>
+    <info style="display: inline-block">   Prices:<span id="prices">-Waiting-</span> Ether</info>
     <hr />
 
     <!-- Room -->
     <h4 style="display: inline-block">101 :</h4>
-    <room id="status101" style="display: inline-block"> -Waiting-<span id="status101"></span></room>
+    <room  style="display: inline-block"><span id="status101"> -Waiting-</span><span id="timeLeft101"></span></room>
     <br />
     <button id="button" style="    display: inline-block" onclick="javascript:getStatusRoom(101)">check status</button>
     <button id="button" style="    display: inline-block" onclick="javascript:rentRoom(101)">rent</button>
@@ -84,7 +84,7 @@
 
     <!-- Room -->
     <h4 style="display: inline-block">102 :</h4>
-    <room id="status102" style="display: inline-block"> -Waiting-<span id="status102"></span></room>
+    <room style="display: inline-block"><span id="status102"> -Waiting-</span><span id="timeLeft102"></span></room>
     <br />
     <button id="button" style="    display: inline-block" onclick="javascript:getStatusRoom(102)">check status</button>
     <button id="button" style="    display: inline-block" onclick="javascript:rentRoom(102)">rent</button>
@@ -92,13 +92,14 @@
 
     <!-- Room -->
     <h4 style="display: inline-block">103 :</h4>
-    <room id="status103" style="display: inline-block"> -Waiting-<span id="status103"></span></room>
+    <room style="display: inline-block"><span id="status103"> -Waiting-</span><span id="timeLeft103"></span></room>
     <br />
     <button id="button" style="    display: inline-block" onclick="javascript:getStatusRoom(103)">check status</button>
     <button id="button" style="    display: inline-block" onclick="javascript:rentRoom(103)">rent</button>
     <hr />
   </div>
 </body>
+
 <script>
   function addStatusLine(text) {
     document.getElementById("status").innerHTML = text + "<br/><br/>" + document.getElementById("status").innerHTML;
@@ -123,8 +124,10 @@
 
   function getPrices() {
     dailyRentalContract.getPrice(function (error, result) {
-    document.getElementById('prices').innerText = result;
-    })
+      result = parseInt(result, 10);  // covert to int
+      document.getElementById('prices').innerText = result / 10 ** 18; // convert form wei to ether
+      return result;  // return price
+    }) 
   }
 
   function getPeriod() {
@@ -137,11 +140,21 @@
     document.getElementById('status' + room).innerText = "-Waiting-";
     dailyRentalContract.getRoomStatus(room, function (error, result) {
       document.getElementById('status' + room).innerText = result;
-    })   
+    })
+    dailyRentalContract.getTimeLeft(room, function (error, result) {   
+      if (result < 100000000000) {
+        // If not negative
+        document.getElementById('timeLeft' + room).innerText = " - " + result + " second";
+      } else {
+        document.getElementById('timeLeft' + room).innerText = "";
+      }
+    })
   }
 
   function rentRoom(room) {
-    dailyRentalContract.rent(room, { from: userAccount, value: 100 }, function (error, result) {
+    amount = getPrices();
+    amount = 10000000000000000;
+    dailyRentalContract.rent(room, { 'value': amount }, function (error, result) {
       if (error) {
         addStatusLine(error);
         return;
@@ -160,53 +173,5 @@
     startApp()
 
   });
-
-  // Get default address
-  web3.eth.defaultAccount = web3.eth.accounts[0];
-
-  // TODO: Replace your SimpleContract contract address here
-  var contractAddress = '0x3eb260d7847f83c164a67d4ccca6058c6594774c';
-  // TODO: Replace your SimpleContract abi here
-  var abi = [
-    {
-      "constant": false,
-      "inputs": [
-        {
-          "name": "newBalance",
-          "type": "uint256"
-        }
-      ],
-      "name": "setBalance",
-      "outputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "payable": false,
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
-      "constant": true,
-      "inputs": [],
-      "name": "getBalance",
-      "outputs": [
-        {
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "payable": false,
-      "stateMutability": "view",
-      "type": "function"
-    }
-  ];
-    // Create an interface to SimpleContract on TomoChain
-  var SimpleContractContract = web3.eth.contract(abi);
-  var SimpleContract = SimpleContractContract.at(contractAddress);
-  // Get Balance on the first load
-  getBalance();
 </script>
 </html>
