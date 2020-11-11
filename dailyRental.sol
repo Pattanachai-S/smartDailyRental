@@ -53,10 +53,10 @@ contract rental is Ownable{
         Room cRoom = rooms[_number];
         // can rent when room is Availability or user as the person who is using it. 
         require(compareString(getRoomStatus(cRoom.number), "Availability") || (cRoom.user == msg.sender));
-        require(msg.value >= prices);  // some problem on here
+        require(msg.value == prices);  
         addUseTime(_number);
         cRoom.user = msg.sender;
-        // withdraw(); // Transfer ether to owner
+        withdraw(); // Transfer ether to owner
     }
     
     function addUseTime(uint _number) internal {

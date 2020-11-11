@@ -106,7 +106,7 @@
   }
 
   function startApp() {
-    var rentalContractAddress = "0xc28F48565dd9b116D0ba4834159bf3bf45fa7321";
+    var rentalContractAddress = "0x9d58bb4303a4F760e28503Aa73B5Ee7896D9213D";
     //dailyRentalContract = new web3js.eth.Contract(dailyRentalABI, rentalContractAddress);
     var rentalContractABI = web3.eth.contract(dailyRentalABI);
     dailyRentalContract = rentalContractABI.at(rentalContractAddress);
@@ -126,7 +126,6 @@
     dailyRentalContract.getPrice(function (error, result) {
       result = parseInt(result, 10);  // covert to int
       document.getElementById('prices').innerText = result / 10 ** 18; // convert form wei to ether
-      return result;  // return price
     }) 
   }
 
@@ -137,7 +136,10 @@
   }
 
   function getStatusRoom(room) {
+    // text for wait data form blockchain
     document.getElementById('status' + room).innerText = "-Waiting-";
+    document.getElementById('timeLeft' + room).innerText = ""
+
     dailyRentalContract.getRoomStatus(room, function (error, result) {
       document.getElementById('status' + room).innerText = result;
     })
@@ -152,8 +154,10 @@
   }
 
   function rentRoom(room) {
-    amount = getPrices();
-    amount = 10000000000000000;
+    dailyRentalContract.getPrice(function (error, result) {
+      result = parseInt(result, 10);  // covert to int
+      amount = result;
+    }) 
     dailyRentalContract.rent(room, { 'value': amount }, function (error, result) {
       if (error) {
         addStatusLine(error);
